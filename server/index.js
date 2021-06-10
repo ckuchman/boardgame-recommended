@@ -1,6 +1,6 @@
 const path = require('path');
 const express = require("express");
-const { Client } = require('pg');
+const { Pool } = require('pg');
 
 const PORT = process.env.PORT || 3001;
 
@@ -10,26 +10,21 @@ const app = express();
 app.use(express.static(path.resolve(__dirname, '../client/build')));
 
 // Postgres connection
-const client = new Client({
+const pool = new Pool({
+  // database: 'test',
+  // port: 5433,
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
 });
 
-client.connect();
 
-client.query('SELECT count(*) FROM test;', (err, res) => {
-  if (err) throw err;
-  for (let row of res.rows) {
-    console.log(JSON.stringify(row));
-  }
-  client.end();
-});
-
-
-app.get('/api', (req, res) => {
-  res.json({ messsage: "Hello from server"});
+app.get('/api', async (req, res) => {
+  const client = await pool.connect()
+  const result = await client.query('SELECT * FROM test')
+  await res.json({ rows: result.rows});
+  await client.release()
 });
 
 // All other GET requests not handled before will return our React app
