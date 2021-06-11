@@ -12,8 +12,6 @@ app.use(express.static(path.resolve(__dirname, '../client/build')));
 
 // Postgres connection
 const pool = new Pool({
-  database: 'test',
-  port: 5433,
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
