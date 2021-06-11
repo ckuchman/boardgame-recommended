@@ -1,6 +1,8 @@
 const path = require('path');
 const express = require("express");
 const { Pool } = require('pg');
+const cheerio = require('cheerio');
+const axios = require('axios').default;
 
 const PORT = process.env.PORT || 3001;
 
@@ -11,14 +13,28 @@ app.use(express.static(path.resolve(__dirname, '../client/build')));
 
 // Postgres connection
 const pool = new Pool({
-  // database: 'test',
-  // port: 5433,
+  database: 'test',
+  port: 5433,
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
 });
 
+app.get('/bglist', async (req, res) => {
+  try {
+      const resp = await axios.get('https://boardgamegeek.com/browse/boardgame/page/1');
+
+      const $ = cheerio.load(resp.data);
+
+      $('.collection_thumbnail').each(function (i, elem) {
+          console.error($(this).children()[0].attribs.href);
+        });
+  } catch (err) {
+      // Handle Error Here
+      console.error(err);
+  }
+});
 
 app.get('/api', async (req, res) => {
   const client = await pool.connect()
