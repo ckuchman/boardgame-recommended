@@ -1,8 +1,7 @@
 const path = require('path');
 const express = require("express");
 const { Pool } = require('pg');
-const cheerio = require('cheerio');
-const axios = require('axios').default;
+const parseBGG = require('./parseBGG');
 
 const PORT = process.env.PORT || 3001;
 
@@ -22,18 +21,7 @@ const pool = new Pool({
 });
 
 app.get('/bglist', async (req, res) => {
-  try {
-      const resp = await axios.get('https://boardgamegeek.com/browse/boardgame/page/1');
-
-      const $ = cheerio.load(resp.data);
-
-      $('.collection_thumbnail').each(function (i, elem) {
-          console.error($(this).children()[0].attribs.href);
-        });
-  } catch (err) {
-      // Handle Error Here
-      console.error(err);
-  }
+  console.error(await parseBGG.getBgIds(5));
 });
 
 app.get('/api', async (req, res) => {
